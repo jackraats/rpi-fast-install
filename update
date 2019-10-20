@@ -1,0 +1,12 @@
+#! /bin/sh -x
+newaliases
+postalias hash:/etc/aliases
+postmap hash:/postfix/tables/transport
+postmap hash:/postfix/tables/virtual_alias_domains
+postmap hash:/postfix/tables/virtual_alias_maps
+postmap hash:/postfix/tables/helo_checks
+postmap hash:/postfix/tables/generic
+postmap hash:/postfix/tables/sender_checks
+postmap hash:/postfix/tables/spamtrap
+postfix reload
+postfix flush

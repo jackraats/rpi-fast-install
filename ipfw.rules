@@ -1,0 +1,60 @@
+# variables
+
+IPF="ipfw -q add"
+ks="keep-state"
+sks="setup keep-state"
+
+# flush all rules except the tables
+ipfw -q -f flush
+ipfw -q -f flush
+
+#loopback and deny loopback spoofing
+$IPF pass all from any to any via lo0
+$IPF deny all from any to 127.0.0.0/8
+$IPF deny all from 127.0.0.0/8 to any
+
+# count for mrtg. You need to install mrtg from the packages
+$IPF 1500 count all from any to me
+$IPF 1600 count all from me to any
+
+# check stateful
+$IPF check-state
+
+# sshguard. You need to install sshguard from the packages
+$IPF deny all from table\(22\) to me
+
+# Deny any late arriving packets and ACK packets that did not match the dynamic rule table
+$IPF deny all from any to any frag 
+$IPF deny tcp from any to any established
+
+#icmp
+$IPF pass icmp from any to any icmptypes 0,3,4,8,11 $ks
+$IPF deny icmp from any to any $ks
+
+# tcp deny
+# $IPF deny tcp from any to me 21 $sks
+# $IPF deny tcp from any to me 445 $sks
+# $IPF deny tcp from any to me 3389 $sks
+
+# tcp pass
+$IPF pass tcp from any to me 22 $sks
+$IPF pass tcp from any to me 25 $sks
+$IPF pass tcp from any to me 80 $sks
+$IPF pass tcp from any to me 110 $sks
+$IPF pass tcp from any to me 143 $sks
+$IPF pass tcp from any to me 443 $sks
+$IPF pass tcp from any to me 587 $sks
+$IPF pass tcp from any to me 993 $sks
+$IPF pass tcp from any to me 995 $sks
+$IPF pass tcp from me to any $sks
+
+# udp
+$IPF pass udp from any to any 53 $ks
+$IPF pass udp from any 53 to any $ks
+$IPF pass udp from any to any 123 $ks
+$IPF pass udp from any 123 to any $ks
+$IPF deny udp from any to any $ks
+
+# deny and log everything
+$IPF deny log logamount 0 tcp from any to any
+$IPF deny all from any to any

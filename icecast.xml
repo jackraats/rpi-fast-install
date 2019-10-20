@@ -1,0 +1,99 @@
+<icecast>
+    <limits>
+        <clients>500</clients>
+        <sources>10</sources>
+        <threadpool>5</threadpool>
+        <queue-size>512000</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>15</header-timeout>
+        <source-timeout>10</source-timeout>
+        <burst-on-connect>1</burst-on-connect>
+        <burst-size>65536</burst-size>
+    </limits>
+
+    <authentication>
+        <source-password>hackme-1</source-password>
+        <relay-password>hackme-2</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>hackme-3</admin-password>
+    </authentication>
+
+    <hostname>Icecast Server</hostname>
+    <location>@home</location>
+    <admin>admin@admin.net</admin>
+
+    <listen-socket>
+        <port>8000</port>
+    </listen-socket>
+
+
+<!--	BEGIN STAIONS -->
+
+<!--    radio seagull -->
+
+    <relay>
+        <server>167.85.113.65</server>
+        <port>8000</port>
+        <mount>/</mount>
+        <local-mount>/seagull</local-mount>                           
+        <relay-shoutcast-metadata>1</relay-shoutcast-metadata>
+        <on-demand>0</on-demand>
+    </relay>
+
+<!--	Pulse 2 from Bradford UK -->
+
+    <relay>
+        <server>89.185.143.180</server>
+        <port>80</port>
+        <mount>/BFDPulse2</mount>
+        <local-mount>/pulse2</local-mount>
+        <relay-shoutcast-metadata>1</relay-shoutcast-metadata>
+        <on-demand>0</on-demand>
+    </relay>
+
+<!--    voice of peace -->
+    <relay>
+        <server>uk3-vn.mixstream.net</server>
+        <port>8264</port>
+        <mount>/</mount>
+        <local-mount>/vop1</local-mount>
+        <relay-shoutcast-metadata>1</relay-shoutcast-metadata>
+        <on-demand>0</on-demand>
+    </relay>
+
+    <relay>
+        <server>uk2-vn.mixstream.net</server>
+        <port>8004</port>
+        <mount>/</mount>
+        <local-mount>/vop2</local-mount>
+        <relay-shoutcast-metadata>1</relay-shoutcast-metadata>
+        <on-demand>0</on-demand>
+    </relay>
+
+<!--	EINDE STATIONS -->
+
+    <paths>
+        <basedir>/usr/local/share/icecast</basedir>
+        <logdir>/usr/local/etc/icecast</logdir>
+        <webroot>/usr/local/share/icecast/web</webroot>
+        <adminroot>/usr/local/share/icecast/admin</adminroot>
+        <alias source="/" dest="/status.xsl"/>
+    </paths>
+
+    <logging>
+        <accesslog>access.log</accesslog>
+        <errorlog>error.log</errorlog>
+	<playlistlog>playlist.log</playlistlog>
+      	<loglevel>1</loglevel>
+      	<logsize>10000</logsize>
+	<logarchive>1</logarchive>
+    </logging>
+
+    <security>
+        <chroot>0</chroot>
+        <changeowner>
+            <user>jack</user>
+            <group>jack</group>
+        </changeowner>
+    </security>
+</icecast>

@@ -1,0 +1,209 @@
+command_directory = /usr/local/sbin
+daemon_directory = /usr/local/libexec/postfix
+sendmail_path = /usr/local/sbin/sendmail
+newaliases_path = /usr/local/bin/newaliases
+mailq_path = /usr/local/bin/mailq
+manpage_directory = /usr/local/man
+sample_directory = /usr/local/etc/postfix
+readme_directory = /usr/local/share/doc/postfix
+
+default_destination_concurrency_limit = 5
+
+maximal_queue_lifetime = 7d
+smtpd_error_sleep_time = 2
+
+setgid_group = maildrop
+message_size_limit = 40960000
+bounce_size_limit = 1
+mailbox_size_limit = 0
+
+## Replace with your hostname and domainname
+
+myhostname = hostname
+mydomain =  domainname
+myorigin = $mydomain
+mydestination = $mydomain
+
+owner_request_special = no
+recipient_delimiter = +
+smtpd_banner = $myhostname ESMTP $mail_name ; The $myhostname mailserver
+notify_classes = resource, software
+
+relay_domains = $mydestination,
+ 		hash:/postfix/tables/transport
+
+#
+# aliases
+#
+
+alias_maps = hash:/etc/aliases
+alias_database = $alias_maps
+smtp_generic_maps = hash:/postfix/tables/generic
+local_recipient_maps = proxy:unix:passwd.byname $alias_maps
+
+mynetworks =	  host
+inet_interfaces = all
+
+# virtual
+
+virtual_alias_maps = 	hash:/postfix/tables/virtual_alias_maps
+virtual_alias_domains = hash:/postfix/tables/virtual_alias_domains
+
+# transport
+
+transport_maps  = hash:/postfix/tables/transport
+mailbox_command = /usr/local/bin/procmail -a $EXTENSION
+
+debug_peer_level = 2
+debugger_command =
+	 PATH=/usr/bin:/usr/X11R6/bin
+	 xxgdb $daemon_directory/$process_name $process_id & sleep 5
+
+# ----------------------------------------------
+# SASL via dovecot = server only
+# ----------------------------------------------
+
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = /var/run/dovecot/auth-client
+
+# ----------------------------------------------
+# UCE filtering
+# ----------------------------------------------
+
+smtpd_helo_required = yes
+smtpd_helo_restrictions =
+disable_vrfy_command = yes
+strict_rfc821_envelopes = yes
+parent_domain_matches_subdomains = smtpd_access_maps
+spf-policy_time_limit = 3600
+
+header_checks = pcre:/postfix/tables/header_checks
+body_checks =   pcre:/postfix/tables/body_checks
+
+# ----------------------------------------------
+# postscreen / postgrey werkt beter
+# ----------------------------------------------
+
+postscreen_access_list = permit_mynetworks
+postscreen_dnsbl_threshold = 3
+postscreen_dnsbl_whitelist_threshold = -1
+postscreen_dnsbl_sites=	
+	zen.spamhaus.org*3,
+	b.barracudacentral.org*2,
+	bl.spameatingmonkey.net*2,
+	bl.spamcop.net*1,
+	dnsbl.sorbs.net*1,
+	bl.mailspike.net*1
+
+postscreen_dnsbl_action = enforce
+postscreen_greet_action = enforce
+postscreen_helo_required = yes
+postscreen_blacklist_action = drop
+
+# postscreen_pipelining_enable = yes
+postscreen_pipelining_action = enforce
+# postscreen_pipelining_ttl = 30d
+
+postscreen_non_smtp_command_action = enforce
+# postscreen_non_smtp_command_enable = yes
+# postscreen_non_smtp_command_ttl = 30d
+
+postscreen_bare_newline_action = enforce
+# postscreen_bare_newline_enable = yes
+# postscreen_bare_newline_ttl = 30d
+
+# ----------------------------------------------
+# Address verification
+# ----------------------------------------------
+
+address_verify_sender = $double_bounce_sender
+address_verify_map = btree:/var/db/postfix/verifymap
+unverified_sender_reject_code = 550
+address_verify_poll_count = 3
+address_verify_poll_delay = 3s
+address_verify_positive_expire_time = 31d
+address_verify_positive_refresh_time = 7d
+address_verify_negative_cache = yes
+address_verify_negative_expire_time = 3d
+address_verify_negative_refresh_time = 2h
+
+# ----------------------------------------------
+# Tarpit
+# ----------------------------------------------
+
+smtpd_soft_error_limit = 10
+smtpd_hard_error_limit = 20
+smtpd_junk_command_limit =50
+smtpd_recipient_overshoot_limit = 500
+
+# ---------------------------------------------
+# restrictions
+# ---------------------------------------------
+
+smtpd_recipient_restrictions = 	
+	reject_non_fqdn_recipient,
+	reject_non_fqdn_sender,
+	reject_unknown_sender_domain,
+	reject_unknown_recipient_domain,
+	permit_mynetworks,
+	permit_sasl_authenticated,
+	reject_unauth_destination,
+	check_helo_access		hash:/postfix/tables/helo_checks,
+	check_sender_mx_access		cidr:/postfix/tables/bogus_mx,
+	check_helo_access		pcre:/postfix/tables/tld_acl,
+	check_client_access		pcre:/postfix/tables/tld_acl,
+	check_sender_access		pcre:/postfix/tables/tld_acl,
+	check_sender_access		hash:/postfix/tables/sender_checks,
+	check_recipient_access		hash:/postfix/tables/spamtrap,
+	reject_non_fqdn_helo_hostname,
+	reject_invalid_helo_hostname,
+	reject_non_fqdn_hostname
+	reject_rhsbl_client		multi.surbl.org,
+	reject_rhsbl_helo		multi.surbl.org,
+	reject_rhsbl_sender		multi.surbl.org,
+	reject_rhsbl_reverse_client	multi.surbl.org,
+	reject_rhsbl_recipient		multi.surbl.org,
+	reject_rhsbl_client		dbl.spamhaus.org,
+	reject_rhsbl_helo		dbl.spamhaus.org,
+	reject_rhsbl_sender		dbl.spamhaus.org,
+	reject_rhsbl_reverse_client	dbl.spamhaus.org,
+	reject_rhsbl_recipient		dbl.spamhaus.org,
+	check_policy_service		unix:private/spf-policy,
+	permit
+
+smtpd_data_restrictions =
+	reject_unauth_pipelining,
+	reject_multi_recipient_bounce,
+	permit
+
+smtpd_relay_restrictions = 
+#	permit_mynetworks
+#	permit_sasl_authenticated
+#	defer_unauth_destination
+
+# Bounces
+multi_recipient_bounce_reject_code = 550
+#
+# unverified_sender_reject_code = 550
+# unverified_recipient_reject_code = 550
+#
+unknown_local_recipient_reject_code = 550
+unknown_relay_recipient_reject_code = 550
+unknown_virtual_alias_reject_code = 550
+unknown_virtual_mailbox_reject_code = 550
+unknown_address_reject_code = 550
+unknown_hostname_reject_code = 550
+unknown_client_reject_code = 450
+#
+html_directory = /usr/local/share/doc/postfix
+queue_run_delay = 100s
+maximal_backoff_time = 400s
+minimal_backoff_time = 100s
+queue_directory = /var/spool/postfix
+mail_owner = postfix
+data_directory = /var/db/postfix
+inet_protocols = ipv4
+compatibility_level = 2
+meta_directory = /usr/local/libexec/postfix
+shlib_directory = /usr/local/lib/postfix

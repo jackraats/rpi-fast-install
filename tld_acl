@@ -1,0 +1,26 @@
+# ------------------------------------------------------------------------
+# tld_acl
+# ------------------------------------------------------------------------
+# WHITELISTING
+# ------------------------------------------------------------------------
+/\.(com|org|net|edu|nl|be|de)$/				DUNNO
+# ------------------------------------------------------------------------
+# BLACKLISTING strange tld
+# ------------------------------------------------------------------------
+/\.(arpa|localdomain|localhost)$/			REJECT T01
+/\.(lan|pro|api|host|press|ovh)$/			REJECT T02
+/\.(trade|link|site|biz|online|local)$/			REJECT T03
+/\.(click|bid|faith|date|agency)$/			REJECT T04
+/\.(pro|date|science|download|click)$/			REJECT T05
+/\.(link|diet|review|party|zip|xyz)$/			REJECT T06
+/\.(top|services|technology|reisen|work)$/		REJECT T07
+/\.(stream|club|loan|icu)$/				REJECT T08
+# ------------------------------------------------------------------------
+# BLACKLISTING countries
+# ------------------------------------------------------------------------
+/\.(ac|ae|am|ar|br|by|cc|co|gdn|hr)$/			REJECT C01
+/\.(cn|eg|es|fj|gd|hk|hu|id|il|in|it|jp)$/		REJECT C02
+/\.(lb|lt|mx|my|pe|ph|pl|pr|pt|ro|ru|sg)$/		REJECT C03
+/\.(th|tr|tw|us|ua|vn)$/				REJECT C04
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
